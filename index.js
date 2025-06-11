@@ -33,16 +33,21 @@ const store = new sessionStore({
   try {
     await store.sync({ force: false });
     console.log("Sessions table synced");
-    await Kkm.sync({ force: false });
-    console.log("KKM table synced");
-    await Question.sync({ force: false });
-    console.log("Questions table synced");
-    await Score.sync({ force: false });
-    console.log("Scores table synced");
-    await Evaluation.sync({ force: false });
-    console.log("Evaluations table synced");
+
     await User.sync({ force: false });
     console.log("Users table synced");
+
+    await Evaluation.sync({ force: false });
+    console.log("Evaluations table synced");
+
+    await Kkm.sync({ force: false });
+    console.log("KKM table synced");
+
+    await Score.sync({ force: false });
+    console.log("Scores table synced");
+
+    await Question.sync({ force: false });
+    console.log("Questions table synced");
 
     const evaluations = await Evaluation.findAll();
     if (evaluations.length === 0) {
