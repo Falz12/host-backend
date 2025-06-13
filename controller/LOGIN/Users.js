@@ -199,87 +199,220 @@ const updateProgress = async (req, res) => {
 
 const validateLesson = async (req, res) => {
   const { lessonPath } = req.body;
+  const { id } = req.params;
+
   try {
+    // Verifikasi pengguna
+    if (req.session.userId !== id) {
+      return res.status(403).json({ msg: "Akses ditolak" });
+    }
+
     const user = await User.findOne({
       attributes: ["uuid", "completedLessons"],
-      where: { uuid: req.params.id },
+      where: { uuid: id },
     });
     if (!user) {
       return res.status(404).json({ msg: "User tidak ditemukan" });
     }
+
     const completedLessons = user.completedLessons || [];
-    // Define all lessons in order (this could be moved to a shared config)
-    const allLessons = [
-      "/materi/bab1/pengenalan",
-      "/materi/bab1/instalasi",
-      "/materi/bab1/struktur-kode",
-      "/materi/bab1/struktur-eksekusi",
-      "/materi/bab1/sintaks-print",
-      "/materi/bab1/sintaks-komentar",
-      "/materi/bab1/error-csharp",
-      "/materi/bab1/latihan-bab1",
-      "/materi/bab1/kuis-bab1",
-      "/materi/bab1/rangkuman-bab1",
-      "/materi/bab2/variabel",
-      "/materi/bab2/penamaan-variabel",
-      "/materi/bab2/kategori-variabel",
-      "/materi/bab2/deklarasi-inialisasi",
-      "/materi/bab2/deklarasi-banyak",
-      "/materi/bab2/variabel-konstanta",
-      "/materi/bab2/sintaks-input",
-      "/materi/bab2/latihan-bab2",
-      "/materi/bab2/kuis-bab2",
-      "/materi/bab2/rangkuman-bab2",
-      "/materi/bab3/pengertian-tipedata",
-      "/materi/bab3/klasifikasi-tipedata",
-      "/materi/bab3/tipe-data-dasar",
-      "/materi/bab3/integer",
-      "/materi/bab3/floating-point",
-      "/materi/bab3/boolean",
-      "/materi/bab3/char",
-      "/materi/bab3/string",
-      "/materi/bab3/latihan-bab3",
-      "/materi/bab3/kuis-bab3",
-      "/materi/bab3/rangkuman-bab3",
-      "/materi/bab4/pengertian-operator",
-      "/materi/bab4/operator-arithmetic",
-      "/materi/bab4/operator-increment-decrement",
-      "/materi/bab4/operator-assignment",
-      "/materi/bab4/operator-comparison",
-      "/materi/bab4/operator-logika",
-      "/materi/bab4/operator-conditional",
-      "/materi/bab4/operator-equality",
-      "/materi/bab4/latihan-bab4",
-      "/materi/bab4/kuis-bab4",
-      "/materi/bab4/rangkuman-bab4",
-      "/materi/bab5/pengertian-kontrol-alur",
-      "/materi/bab5/pernyataan-if-else",
-      "/materi/bab5/pernyataan-switch",
-      "/materi/bab5/pernyataan-perulangan",
-      "/materi/bab5/pernyataan-break-continue",
-      "/materi/bab5/perulangan-bersarang",
-      "/materi/bab5/latihan-bab5",
-      "/materi/bab5/kuis-bab5",
-      "/materi/bab5/rangkuman-bab5",
-      "/materi/bab6/pengenalan-method",
-      "/materi/bab6/method-void",
-      "/materi/bab6/method-tipe-data",
-      "/materi/bab6/parameter-method",
-      "/materi/bab6/latihan-bab6",
-      "/materi/bab6/kuis-bab6",
-      "/materi/bab6/rangkuman-bab6",
-      "/materi/evaluasi/evaluasi-akhir",
+
+    // Daftar materi sesuai daftarBab.json
+    const daftarBab = [
+      {
+        id: 1,
+        judul: "Pendahuluan",
+        icon: "pendahuluanIcon",
+        subBab: [
+          { path: "/materi/bab1/pengenalan", label: "Pengenalan" },
+          { path: "/materi/bab1/instalasi", label: "Instalasi" },
+          { path: "/materi/bab1/struktur-kode", label: "Struktur Kode" },
+          {
+            path: "/materi/bab1/struktur-eksekusi",
+            label: "Struktur Eksekusi",
+          },
+          { path: "/materi/bab1/sintaks-print", label: "Sintaks Print" },
+          { path: "/materi/bab1/sintaks-komentar", label: "Sintaks Komentar" },
+          { path: "/materi/bab1/error-csharp", label: "Error C#" },
+          { path: "/materi/bab1/latihan-bab1", label: "Latihan Bab 1" },
+          { path: "/materi/bab1/kuis-bab1", label: "Kuis Bab 1" },
+          { path: "/materi/bab1/rangkuman-bab1", label: "Rangkuman Bab 1" },
+        ],
+      },
+      {
+        id: 2,
+        judul: "Variabel",
+        icon: "variabelIcon",
+        subBab: [
+          { path: "/materi/bab2/variabel", label: "Variabel" },
+          {
+            path: "/materi/bab2/penamaan-variabel",
+            label: "Penamaan Variabel",
+          },
+          {
+            path: "/materi/bab2/kategori-variabel",
+            label: "Kategori Variabel",
+          },
+          {
+            path: "/materi/bab2/deklarasi-inialisasi",
+            label: "Deklarasi dan Inialisasi",
+          },
+          {
+            path: "/materi/bab2/deklarasi-banyak",
+            label: "Deklarasi Banyak Variabel",
+          },
+          {
+            path: "/materi/bab2/variabel-konstanta",
+            label: "Variabel dan Konstanta",
+          },
+          { path: "/materi/bab2/sintaks-input", label: "Sintaks Input" },
+          { path: "/materi/bab2/latihan-bab2", label: "Latihan Bab 2" },
+          { path: "/materi/bab2/kuis-bab2", label: "Kuis Bab 2" },
+          { path: "/materi/bab2/rangkuman-bab2", label: "Rangkuman Bab 2" },
+        ],
+      },
+      {
+        id: 3,
+        judul: "Tipe Data",
+        icon: "tipeDataIcon",
+        subBab: [
+          {
+            path: "/materi/bab3/pengertian-tipedata",
+            label: "Pengertian Tipe Data",
+          },
+          {
+            path: "/materi/bab3/klasifikasi-tipedata",
+            label: "Klasifikasi Tipe Data",
+          },
+          { path: "/materi/bab3/tipe-data-dasar", label: "Tipe Data Dasar" },
+          { path: "/materi/bab3/integer", label: "Integer" },
+          { path: "/materi/bab3/floating-point", label: "Floating Point" },
+          { path: "/materi/bab3/boolean", label: "Boolean" },
+          { path: "/materi/bab3/char", label: "Char" },
+          { path: "/materi/bab3/string", label: "String" },
+          { path: "/materi/bab3/latihan-bab3", label: "Latihan Bab 3" },
+          { path: "/materi/bab3/kuis-bab3", label: "Kuis Bab 3" },
+          { path: "/materi/bab3/rangkuman-bab3", label: "Rangkuman Bab 3" },
+        ],
+      },
+      {
+        id: 4,
+        judul: "Operator",
+        icon: "operatorIcon",
+        subBab: [
+          {
+            path: "/materi/bab4/pengertian-operator",
+            label: "Pengertian Operator",
+          },
+          {
+            path: "/materi/bab4/operator-arithmetic",
+            label: "Operator Aritmatika",
+          },
+          {
+            path: "/materi/bab4/operator-increment-decrement",
+            label: "Operator Increment dan Decrement",
+          },
+          {
+            path: "/materi/bab4/operator-assignment",
+            label: "Operator Assignment",
+          },
+          {
+            path: "/materi/bab4/operator-comparison",
+            label: "Operator Perbandingan",
+          },
+          { path: "/materi/bab4/operator-logika", label: "Operator Logika" },
+          {
+            path: "/materi/bab4/operator-conditional",
+            label: "Operator Kondisional",
+          },
+          {
+            path: "/materi/bab4/operator-equality",
+            label: "Operator Equality",
+          },
+          { path: "/materi/bab4/latihan-bab4", label: "Latihan Bab 4" },
+          { path: "/materi/bab4/kuis-bab4", label: "Kuis Bab 4" },
+          { path: "/materi/bab4/rangkuman-bab4", label: "Rangkuman Bab 4" },
+        ],
+      },
+      {
+        id: 5,
+        judul: "Kontrol Alur",
+        icon: "kontrolAlurIcon",
+        subBab: [
+          {
+            path: "/materi/bab5/pengertian-kontrol-alur",
+            label: "Pengertian Kontrol Alur",
+          },
+          {
+            path: "/materi/bab5/pernyataan-if-else",
+            label: "Pernyataan If-Else",
+          },
+          {
+            path: "/materi/bab5/pernyataan-switch",
+            label: "Pernyataan Switch",
+          },
+          {
+            path: "/materi/bab5/pernyataan-perulangan",
+            label: "Pernyataan Perulangan",
+          },
+          {
+            path: "/materi/bab5/pernyataan-break-continue",
+            label: "Pernyataan Break dan Continue",
+          },
+          {
+            path: "/materi/bab5/perulangan-bersarang",
+            label: "Perulangan Bersarang",
+          },
+          { path: "/materi/bab5/latihan-bab5", label: "Latihan Bab 5" },
+          { path: "/materi/bab5/kuis-bab5", label: "Kuis Bab 5" },
+          { path: "/materi/bab5/rangkuman-bab5", label: "Rangkuman Bab 5" },
+        ],
+      },
+      {
+        id: 6,
+        judul: "Method",
+        icon: "methodIcon",
+        subBab: [
+          {
+            path: "/materi/bab6/pengenalan-method",
+            label: "Pengenalan Method",
+          },
+          { path: "/materi/bab6/method-void", label: "Method Void" },
+          {
+            path: "/materi/bab6/method-tipe-data",
+            label: "Method dengan Tipe Data",
+          },
+          { path: "/materi/bab6/parameter-method", label: "Parameter Method" },
+          { path: "/materi/bab6/latihan-bab6", label: "Latihan Bab 6" },
+          { path: "/materi/bab6/kuis-bab6", label: "Kuis Bab 6" },
+          { path: "/materi/bab6/rangkuman-bab6", label: "Rangkuman Bab 6" },
+        ],
+      },
+      {
+        id: 7,
+        judul: "Evaluasi",
+        icon: "evaluasi",
+        subBab: [
+          { path: "/materi/evaluasi/evaluasi-akhir", label: "Evaluasi Akhir" },
+        ],
+      },
     ];
+
+    const allLessons = daftarBab.flatMap((bab) =>
+      bab.subBab.map((sub) => sub.path)
+    );
     const lessonIndex = allLessons.indexOf(lessonPath);
+
     if (lessonIndex === -1) {
       return res.status(400).json({ msg: "Materi tidak valid" });
     }
-    // Allow access if the lesson is completed or is the next lesson
+
     const isAccessible =
       completedLessons.includes(lessonPath) ||
-      (completedLessons.length > 0 &&
-        allLessons[completedLessons.length] === lessonPath) ||
-      (completedLessons.length === 0 && lessonIndex === 0);
+      lessonIndex === 0 ||
+      (lessonIndex > 0 &&
+        completedLessons.includes(allLessons[lessonIndex - 1]));
+
     res.status(200).json({ isAccessible });
   } catch (error) {
     console.error("Error di validateLesson:", error.message);

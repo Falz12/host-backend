@@ -7,6 +7,7 @@ import {
   updateUsers,
   delateUsers,
   updateProgress,
+  validateLesson,
 } from "../../controller/LOGIN/Users.js";
 import { verifyUser, adminOnly } from "../../middleware/Login/AuthUser.js";
 
@@ -19,5 +20,6 @@ router.post("/users", verifyUser, adminOnly, createUsers);
 router.patch("/users/:id", verifyUser, adminOnly, updateUsers);
 router.delete("/users/:id", verifyUser, adminOnly, delateUsers);
 router.patch("/users/:id/progress", verifyUser, updateProgress);
+router.post("/users/:id/validate-lesson", verifyUser, validateLesson);
 
 export default router;

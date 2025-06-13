@@ -86,13 +86,21 @@ const Users = db.define(
       },
     },
     completedLessons: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      defaultValue: [],
+      type: DataTypes.TEXT,
+      allowNull: false,
+      get() {
+        const value = this.getDataValue("completedLessons");
+        return value ? JSON.parse(value) : [];
+      },
+      set(value) {
+        this.setDataValue("completedLessons", JSON.stringify(value || []));
+      },
       validate: {
-        isArray(value) {
-          if (!Array.isArray(value)) {
-            throw new Error("completedLessons harus berupa array");
+        isValidJSON(value) {
+          try {
+            JSON.parse(value);
+          } catch (e) {
+            throw new Error("completedLessons harus berupa JSON yang valid");
           }
         },
       },
