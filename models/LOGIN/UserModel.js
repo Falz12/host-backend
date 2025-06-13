@@ -85,6 +85,18 @@ const Users = db.define(
         max: 100,
       },
     },
+    completedLessons: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
+      validate: {
+        isArray(value) {
+          if (!Array.isArray(value)) {
+            throw new Error("completedLessons harus berupa array");
+          }
+        },
+      },
+    },
   },
   {
     freezeTableName: true,
