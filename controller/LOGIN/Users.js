@@ -225,7 +225,7 @@ const validateLesson = async (req, res) => {
         icon: "pendahuluanIcon",
         subBab: [
           { path: "/materi/bab1/pengenalan", label: "Pengenalan" },
-          { path: "/materi/bab1/instalasi", label: "Instalasi" },
+
           { path: "/materi/bab1/struktur-kode", label: "Struktur Kode" },
           {
             path: "/materi/bab1/struktur-eksekusi",
