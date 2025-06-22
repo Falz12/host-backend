@@ -411,6 +411,10 @@ const validateLesson = async (req, res) => {
             path: "/materi/evaluasi/evaluasi-akhir",
             label: "Evaluasi Akhir",
           },
+          {
+            path: "/materi/evaluasi/penutup",
+            label: "Penutup",
+          },
         ],
       },
     ];
