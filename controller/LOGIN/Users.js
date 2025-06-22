@@ -419,10 +419,18 @@ const validateLesson = async (req, res) => {
       },
     ];
 
-    const allLessons = daftarBab.flatMap((bab) =>
-      bab.subBab.map((sub) => sub.path)
-    );
+    const allLessons = daftarBab
+      .flatMap((bab) => bab.subBab.map((sub) => sub.path))
+      .filter((path) => path !== "/materi/evaluasi/penutup"); // Exclude Penutup
     const lessonIndex = allLessons.indexOf(lessonPath);
+
+    // Allow access to Penutup if Evaluasi Akhir is completed
+    if (lessonPath === "/materi/evaluasi/penutup") {
+      const isAccessible = completedLessons.includes(
+        "/materi/evaluasi/evaluasi-akhir"
+      );
+      return res.status(200).json({ isAccessible });
+    }
 
     if (lessonIndex === -1) {
       return res.status(400).json({ msg: "Materi tidak valid" });
@@ -440,7 +448,7 @@ const validateLesson = async (req, res) => {
     res.status(500).json({ msg: "Terjadi kesalahan pada server" });
   }
 };
-// ok
+
 export {
   getUsers,
   getClasses,
